@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CampusConnect - Campus Event Management{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="{{ url_for('index') }}">
+                    <span class="brand-icon">📚</span>
+                    <span class="brand-text">CampusEvents</span>
+                </a>
+            </div>
+            
+            <div class="nav-menu" id="navMenu">
+                <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+                <a href="{{ url_for('events.browse') }}" class="nav-link">Events</a>
+                <a href="{{ url_for('clubs_page') }}" class="nav-link">Clubs</a>
+                
+                {% if current_user.is_authenticated %}
+                    <!-- Authenticated User -->
+                    <div class="nav-user">
+                        <span class="nav-username">
+                            {{ current_user.name if current_user.__class__.__name__ == 'Student' else current_user.username }}
+                        </span>
+                        <a href="{% if current_user.__class__.__name__ == 'Student' %}{{ url_for('students.dashboard') }}{% elif current_user.__class__.__name__ == 'Club' %}{{ url_for('clubs.dashboard') }}{% else %}{{ url_for('admins.dashboard') }}{% endif %}" 
+                           class="btn btn-primary">
+                            Dashboard
+                        </a>
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline">Logout</a>
+                    </div>
+                {% else %}
+                    <!-- Guest User -->
+                    <div class="nav-auth">
+                        <div class="dropdown">
+                            <button class="btn btn-outline dropdown-toggle">Login ▼</button>
+                            <div class="dropdown-menu">
+                                <a href="{{ url_for('auth.login', role='student') }}" class="dropdown-item">
+                                    🎓 Student Login
+                                </a>
+                                <a href="{{ url_for('auth.login', role='club') }}" class="dropdown-item">
+                                    🏛️ Club Login
+                                </a>
+                                <a href="{{ url_for('auth.login', role='admin') }}" class="dropdown-item">
+                                    👤 Admin Login
+                                </a>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Register</a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Mobile Menu Toggle -->
+            <button class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-container">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible">
+                        <span class="alert-icon">
+                            {% if category == 'success' %}✓{% elif category == 'danger' %}✕{% elif category == 'warning' %}⚠{% else %}ℹ{% endif %}
+                        </span>
+                        <span class="alert-message">{{ message }}</span>
+                        <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>CampusEvents</h3>
+                    <p>Empowering students to discover, participate, and excel in college events.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="{{ url_for('events.browse') }}">Browse Events</a></li>
+                        <li><a href="{{ url_for('clubs_page') }}">Our Clubs</a></li>
+                        <li><a href="{{ url_for('auth.register') }}">Student Registration</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>📧 events@college.edu</p>
+                    <p>📞 +91 12345 67890</p>
+                    <p>📍 Main Campus, Block A</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 CampusEvents. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        const navToggle = document.getElementById('navToggle');
+        const navMenu = document.getElementById('navMenu');
+        
+        if (navToggle) {
+            navToggle.addEventListener('click', () => {
+                navMenu.classList.toggle('active');
+                navToggle.classList.toggle('active');
+            });
+        }
+        
+        // Auto-hide flash messages after 5 seconds
+        document.querySelectorAll('.alert').forEach(alert => {
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            }, 5000);
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

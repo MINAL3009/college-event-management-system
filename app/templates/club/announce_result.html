@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Announce Results - {{ event.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        padding: var(--spacing-2xl) 0;
+        background: var(--light);
+        min-height: calc(100vh - 70px);
+    }
+    
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: var(--white);
+        padding: var(--spacing-2xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .event-info-banner {
+        background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+        color: var(--white);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--spacing-2xl);
+    }
+    
+    .event-info-banner h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .position-card {
+        background: var(--gray-50);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--spacing-lg);
+        border-left: 4px solid var(--gray-400);
+    }
+    
+    .position-card.first {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-left-color: #f59e0b;
+    }
+    
+    .position-card.second {
+        background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+        border-left-color: #9ca3af;
+    }
+    
+    .position-card.third {
+        background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+        border-left-color: #ea580c;
+    }
+    
+    .position-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .position-medal {
+        font-size: 2.5rem;
+    }
+    
+    .position-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--gray-900);
+    }
+    
+    .winner-select {
+        width: 100%;
+        padding: 0.875rem;
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .info-notice {
+        background: #dbeafe;
+        border-left: 4px solid var(--primary);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-2xl);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <div class="form-container">
+            <div class="event-info-banner">
+                <h2>🏆 Announce Results</h2>
+                <p style="opacity: 0.9;">{{ event.title }}</p>
+                <p style="opacity: 0.85; font-size: 0.9375rem;">
+                    📅 {{ event.event_date.strftime('%B %d, %Y') }} | 
+                    📍 {{ event.venue }}
+                </p>
+            </div>
+            
+            <div class="info-notice">
+                <strong>📌 Important:</strong> Select winners for each position. Winners will be notified automatically and their statistics will be updated.
+            </div>
+            
+            <form method="POST">
+                <!-- First Position -->
+                <div class="position-card first">
+                    <div class="position-header">
+                        <div class="position-medal">🥇</div>
+                        <div class="position-title">First Position</div>
+                    </div>
+                    
+                    {% if is_team %}
+                    <div class="form-group">
+                        <label for="team_position_1">Select Winning Team</label>
+                        <select id="team_position_1" name="team_position_1" class="winner-select">
+                            <option value="">-- Select Team --</option>
+                            {% for team in teams %}
+                            <option value="{{ team.id }}">{{ team.team_name }} (Leader: {{ team.leader.name }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% else %}
+                    <div class="form-group">
+                        <label for="student_position_1">Select Winner</label>
+                        <select id="student_position_1" name="student_position_1" class="winner-select">
+                            <option value="">-- Select Student --</option>
+                            {% for reg, student in registrations %}
+                            <option value="{{ student.id }}">{{ student.name }} ({{ student.branch }}, {{ student.year }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="form-group">
+                        <label for="prize_1">Prize (Optional)</label>
+                        <input type="text" id="prize_1" name="prize_1" placeholder="e.g., Trophy + Certificate + ₹5000">
+                    </div>
+                </div>
+                
+                <!-- Second Position -->
+                <div class="position-card second">
+                    <div class="position-header">
+                        <div class="position-medal">🥈</div>
+                        <div class="position-title">Second Position</div>
+                    </div>
+                    
+                    {% if is_team %}
+                    <div class="form-group">
+                        <label for="team_position_2">Select Team</label>
+                        <select id="team_position_2" name="team_position_2" class="winner-select">
+                            <option value="">-- Select Team --</option>
+                            {% for team in teams %}
+                            <option value="{{ team.id }}">{{ team.team_name }} (Leader: {{ team.leader.name }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% else %}
+                    <div class="form-group">
+                        <label for="student_position_2">Select Winner</label>
+                        <select id="student_position_2" name="student_position_2" class="winner-select">
+                            <option value="">-- Select Student --</option>
+                            {% for reg, student in registrations %}
+                            <option value="{{ student.id }}">{{ student.name }} ({{ student.branch }}, {{ student.year }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="form-group">
+                        <label for="prize_2">Prize (Optional)</label>
+                        <input type="text" id="prize_2" name="prize_2" placeholder="e.g., Certificate + ₹3000">
+                    </div>
+                </div>
+                
+                <!-- Third Position -->
+                <div class="position-card third">
+                    <div class="position-header">
+                        <div class="position-medal">🥉</div>
+                        <div class="position-title">Third Position</div>
+                    </div>
+                    
+                    {% if is_team %}
+                    <div class="form-group">
+                        <label for="team_position_3">Select Team</label>
+                        <select id="team_position_3" name="team_position_3" class="winner-select">
+                            <option value="">-- Select Team --</option>
+                            {% for team in teams %}
+                            <option value="{{ team.id }}">{{ team.team_name }} (Leader: {{ team.leader.name }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% else %}
+                    <div class="form-group">
+                        <label for="student_position_3">Select Winner</label>
+                        <select id="student_position_3" name="student_position_3" class="winner-select">
+                            <option value="">-- Select Student --</option>
+                            {% for reg, student in registrations %}
+                            <option value="{{ student.id }}">{{ student.name }} ({{ student.branch }}, {{ student.year }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="form-group">
+                        <label for="prize_3">Prize (Optional)</label>
+                        <input type="text" id="prize_3" name="prize_3" placeholder="e.g., Certificate + ₹2000">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: var(--spacing-lg); margin-top: var(--spacing-lg);">
+                    🎉 Announce Results
+                </button>
+                
+                <a href="{{ url_for('clubs.view_event', event_id=event.id) }}" class="btn btn-outline" 
+                   style="width: 100%; margin-top: var(--spacing-md);">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

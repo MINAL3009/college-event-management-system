@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Request Event - CampusConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        padding: var(--spacing-2xl) 0;
+        background: var(--light);
+        min-height: calc(100vh - 70px);
+    }
+    
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+        background: var(--white);
+        padding: var(--spacing-2xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .form-header {
+        text-align: center;
+        margin-bottom: var(--spacing-2xl);
+    }
+    
+    .form-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .form-header p {
+        color: var(--gray-600);
+    }
+    
+    .info-box {
+        background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--spacing-2xl);
+        border-left: 4px solid var(--primary);
+    }
+    
+    .info-box h3 {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .info-box ul {
+        margin-left: var(--spacing-lg);
+        color: var(--gray-700);
+    }
+    
+    .info-box li {
+        margin-bottom: var(--spacing-xs);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <div class="form-container">
+            <div class="form-header">
+                <h1>Request an Event ✉️</h1>
+                <p>Have an event idea? Request it from a club!</p>
+            </div>
+            
+            <div class="info-box">
+                <h3>💡 How it works:</h3>
+                <ul>
+                    <li>Select the club you'd like to organize the event</li>
+                    <li>Provide details about your event idea</li>
+                    <li>The club will review and respond to your request</li>
+                    <li>Track your request status in "My Requests"</li>
+                </ul>
+            </div>
+            
+            <form method="POST">
+                <div class="form-group">
+                    <label for="club_id">Select Club *</label>
+                    <select id="club_id" name="club_id" required>
+                        <option value="">Choose a club...</option>
+                        {% for club in clubs %}
+                        <option value="{{ club.id }}">{{ club.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="event_title">Event Title *</label>
+                    <input type="text" id="event_title" name="event_title" 
+                           placeholder="e.g., Web Development Workshop" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="event_type">Event Type *</label>
+                    <select id="event_type" name="event_type" required>
+                        <option value="">Select type...</option>
+                        {% for type in event_types %}
+                        <option value="{{ type }}">{{ type }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description *</label>
+                    <textarea id="description" name="description" rows="6" 
+                              placeholder="Describe your event idea in detail..." required></textarea>
+                    <small style="color: var(--gray-500);">
+                        Include details about the purpose, target audience, and expected outcomes
+                    </small>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Submit Request
+                </button>
+                
+                <a href="{{ url_for('students.my_requests') }}" class="btn btn-outline" 
+                   style="width: 100%; margin-top: var(--spacing-md);">
+                    View My Requests
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

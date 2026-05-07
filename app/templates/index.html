@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block title %}CampusConnect - Discover, Participate, Excel{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title animate-fade-in">Discover, Participate, Excel</h1>
+            <p class="hero-subtitle animate-fade-in-delay">
+                Your one-stop platform for all college events. From cultural fests to tech hackathons,<br>
+                never miss an opportunity to shine.
+            </p>
+            <div class="hero-buttons animate-fade-in-delay-2">
+                <a href="{{ url_for('events.browse') }}" class="btn btn-primary btn-lg">
+                    Explore Events →
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-outline btn-lg">
+                    Register Now
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card animate-scale-in">
+                <div class="stat-icon">📅</div>
+                <div class="stat-number" data-target="{{ total_events }}">0</div>
+                <div class="stat-label">Events per Year</div>
+            </div>
+            
+            <div class="stat-card animate-scale-in" style="animation-delay: 0.1s">
+                <div class="stat-icon">👥</div>
+                <div class="stat-number" data-target="{{ total_students }}">0</div>
+                <div class="stat-label">Active Students</div>
+            </div>
+            
+            <div class="stat-card animate-scale-in" style="animation-delay: 0.2s">
+                <div class="stat-icon">🏛️</div>
+                <div class="stat-number" data-target="{{ total_clubs }}">0</div>
+                <div class="stat-label">Active Clubs</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Upcoming Events Section -->
+<section class="upcoming-events">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Upcoming Events</h2>
+            <p class="section-subtitle">Don't miss out on these exciting upcoming events</p>
+            <a href="{{ url_for('events.browse') }}" class="btn btn-outline">View All Events →</a>
+        </div>
+        
+        {% if gallery_events %}
+        <div class="events-grid">
+            {% for event in gallery_events[:3] %}
+            <div class="event-card">
+                {% if event.image_url %}
+                <div class="event-image" style="background-image: url('{{ event.image_url }}');">
+                    <div class="event-badge">{{ event.event_type }}</div>
+                </div>
+                {% else %}
+                <div class="event-image event-image-placeholder">
+                    <div class="event-placeholder-icon">
+                        {% if event.event_type == 'Technical' %}💻
+                        {% elif event.event_type == 'Cultural' %}🎭
+                        {% elif event.event_type == 'Sports' %}⚽
+                        {% elif event.event_type == 'Workshop' %}🔧
+                        {% else %}📌{% endif %}
+                    </div>
+                    <div class="event-badge">{{ event.event_type }}</div>
+                </div>
+                {% endif %}
+                
+                <div class="event-content">
+                    <h3 class="event-title">{{ event.title }}</h3>
+                    <p class="event-description">{{ event.description[:100] }}...</p>
+                    
+                    <div class="event-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">📅</span>
+                            <span>{{ event.event_date.strftime('%b %d, %Y') }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">⏰</span>
+                            <span>{{ event.event_date.strftime('%I:%M %p') }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">📍</span>
+                            <span>{{ event.venue }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">👥</span>
+                            <span>{{ event.current_participants }}/{{ event.max_participants }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="event-footer">
+                        <span class="event-club">Organized by {{ event.club.name }}</span>
+                        {% if current_user.is_authenticated and current_user.__class__.__name__ == 'Student' %}
+                        <a href="{{ url_for('students.browse_events') }}" class="btn btn-sm btn-primary">Register</a>
+                        {% else %}
+                        <a href="{{ url_for('auth.login', role='student') }}" class="btn btn-sm btn-primary">Login to Register</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <h3>No Upcoming Events</h3>
+            <p>Check back soon for exciting events!</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Past Event Highlights (Gallery Slider) -->
+<section class="gallery-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Past Event Highlights</h2>
+            <p class="section-subtitle">Relive the memorable moments from our past events and get inspired for upcoming ones</p>
+        </div>
+        
+        <div class="gallery-slider">
+            <div class="slider-container">
+                {% set completed_events = gallery_events|selectattr('status', 'equalto', 'completed')|list %}
+                {% if completed_events %}
+                    {% for event in completed_events[:5] %}
+                    <div class="slide {% if loop.first %}active{% endif %}">
+                        <div class="slide-overlay"></div>
+                        <div class="slide-content">
+                            <h3 class="slide-title">{{ event.title }}</h3>
+                            <p class="slide-text">{{ event.current_participants }} students participated in this {{ event.event_type.lower() }} event</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Default slides if no completed events -->
+                    <div class="slide active">
+                        <div class="slide-overlay"></div>
+                        <div class="slide-content">
+                            <h3 class="slide-title">Annual Tech Fest 2023</h3>
+                            <p class="slide-text">Over 500 students participated in various tech competitions</p>
+                        </div>
+                    </div>
+                    <div class="slide">
+                        <div class="slide-overlay"></div>
+                        <div class="slide-content">
+                            <h3 class="slide-title">Cultural Night 2023</h3>
+                            <p class="slide-text">A grand celebration of art, music, and cultural diversity</p>
+                        </div>
+                    </div>
+                    <div class="slide">
+                        <div class="slide-overlay"></div>
+                        <div class="slide-content">
+                            <h3 class="slide-title">Sports Championship</h3>
+                            <p class="slide-text">Inter-college sports competition with 300+ athletes</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <button class="slider-btn slider-btn-prev" onclick="changeSlide(-1)">❮</button>
+            <button class="slider-btn slider-btn-next" onclick="changeSlide(1)">❯</button>
+            
+            <div class="slider-dots"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <h2 class="section-title">Why CampusEvents?</h2>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📅</div>
+                <h3 class="feature-title">Easy Registration</h3>
+                <p class="feature-text">Register for events with just a few clicks. Simple, fast, and hassle-free process.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🏆</div>
+                <h3 class="feature-title">Track Achievements</h3>
+                <p class="feature-text">View your participation history, wins, and download digital certificates instantly.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔔</div>
+                <h3 class="feature-title">Real-time Notifications</h3>
+                <p class="feature-text">Get instant updates about events, results, and important announcements.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📜</div>
+                <h3 class="feature-title">Digital Certificates</h3>
+                <p class="feature-text">Download participation and winner certificates in professional PDF format.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Ready to Get Started?</h2>
+            <p>Join thousands of students already using CampusEvents to discover and participate in amazing events</p>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Create Your Account</a>
+        </div>
+    </div>
+</section>
+
+<script>
+// Counter animation for statistics
+function animateCounter(element) {
+    const target = parseInt(element.getAttribute('data-target'));
+    const duration = 2000;
+    const increment = target / (duration / 16);
+    let current = 0;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+            element.textContent = target + '+';
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.floor(current) + '+';
+        }
+    }, 16);
+}
+
+// Animate counters when in viewport
+const observerOptions = {
+    threshold: 0.5
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const counters = entry.target.querySelectorAll('.stat-number');
+            counters.forEach(counter => {
+                if (counter.textContent === '0') {
+                    animateCounter(counter);
+                }
+            });
+        }
+    });
+}, observerOptions);
+
+const statsSection = document.querySelector('.stats-section');
+if (statsSection) {
+    observer.observe(statsSection);
+}
+
+// Gallery slider functionality
+let currentSlide = 0;
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+
+// Create dots
+const dotsContainer = document.querySelector('.slider-dots');
+if (dotsContainer && totalSlides > 0) {
+    for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'slider-dot' + (i === 0 ? ' active' : '');
+        dot.onclick = () => goToSlide(i);
+        dotsContainer.appendChild(dot);
+    }
+}
+
+function changeSlide(direction) {
+    slides[currentSlide].classList.remove('active');
+    
+    currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+    
+    slides[currentSlide].classList.add('active');
+    updateDots();
+}
+
+function goToSlide(index) {
+    slides[currentSlide].classList.remove('active');
+    currentSlide = index;
+    slides[currentSlide].classList.add('active');
+    updateDots();
+}
+
+function updateDots() {
+    const dots = document.querySelectorAll('.slider-dot');
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentSlide);
+    });
+}
+
+// Auto-advance slides every 5 seconds
+if (totalSlides > 0) {
+    setInterval(() => {
+        changeSlide(1);
+    }, 5000);
+}
+</script>
+
+{% endblock %}

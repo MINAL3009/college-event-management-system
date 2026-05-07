@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Register Team - {{ event.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        padding: var(--spacing-2xl) 0;
+        background: var(--light);
+        min-height: calc(100vh - 70px);
+    }
+    
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+        background: var(--white);
+        padding: var(--spacing-2xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .event-info {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: var(--white);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--spacing-2xl);
+    }
+    
+    .event-info h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .event-info p {
+        opacity: 0.9;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .team-size-info {
+        background: var(--gray-100);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-xl);
+        border-left: 4px solid var(--primary);
+    }
+    
+    .member-input-container {
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .member-input-group {
+        display: flex;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .member-input-group input {
+        flex: 1;
+    }
+    
+    .btn-remove {
+        background: var(--danger);
+        color: var(--white);
+        border: none;
+        padding: 0.625rem 1rem;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-weight: 600;
+    }
+    
+    .btn-add {
+        background: var(--success);
+        color: var(--white);
+        border: none;
+        padding: 0.625rem 1.25rem;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+    
+    .member-count {
+        font-weight: 600;
+        color: var(--primary);
+        margin-bottom: var(--spacing-md);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <div class="form-container">
+            <div class="event-info">
+                <h2>{{ event.title }}</h2>
+                <p>📅 {{ event.event_date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                <p>📍 {{ event.venue }}</p>
+                <p>🏛️ {{ event.club.name }}</p>
+            </div>
+            
+            <div class="team-size-info">
+                <strong>Team Requirements:</strong><br>
+                Minimum {{ min_size }} members | Maximum {{ max_size }} members
+            </div>
+            
+            <form method="POST" id="teamForm">
+                <div class="form-group">
+                    <label for="team_name">Team Name *</label>
+                    <input type="text" id="team_name" name="team_name" placeholder="Enter a unique team name" required>
+                </div>
+                
+                <div class="member-input-container">
+                    <div class="member-count">Team Members (<span id="member-count">1</span>/{{ max_size }})</div>
+                    
+                    <div id="member-inputs">
+                        <div class="member-input-group">
+                            <input type="email" name="member_emails[]" placeholder="Member email (You - Leader)" 
+                                   value="{{ current_user.email }}" readonly required>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn-add" onclick="addMember()">
+                        ➕ Add Member
+                    </button>
+                </div>
+                
+                <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: var(--spacing-lg);">
+                    💡 Tip: Make sure all team members are registered students with valid email addresses
+                </p>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Register Team
+                </button>
+                
+                <a href="{{ url_for('students.browse_events') }}" class="btn btn-outline" style="width: 100%; margin-top: var(--spacing-md);">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let memberCount = 1;
+    const maxMembers = {{ max_size }};
+    const minMembers = {{ min_size }};
+    
+    function addMember() {
+        if (memberCount >= maxMembers) {
+            alert(`Maximum ${maxMembers} members allowed`);
+            return;
+        }
+        
+        memberCount++;
+        const container = document.getElementById('member-inputs');
+        
+        const div = document.createElement('div');
+        div.className = 'member-input-group';
+        div.innerHTML = `
+            <input type="email" name="member_emails[]" placeholder="Member ${memberCount} email" required>
+            <button type="button" class="btn-remove" onclick="removeMember(this)">Remove</button>
+        `;
+        
+        container.appendChild(div);
+        updateMemberCount();
+    }
+    
+    function removeMember(button) {
+        button.parentElement.remove();
+        memberCount--;
+        updateMemberCount();
+    }
+    
+    function updateMemberCount() {
+        document.getElementById('member-count').textContent = memberCount;
+    }
+    
+    // Form validation
+    document.getElementById('teamForm').addEventListener('submit', function(e) {
+        if (memberCount < minMembers) {
+            e.preventDefault();
+            alert(`Team must have at least ${minMembers} members`);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Events - CampusConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        padding: var(--spacing-2xl) 0;
+        background: var(--light);
+        min-height: calc(100vh - 70px);
+    }
+    
+    .filters-section {
+        background: var(--white);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-2xl);
+    }
+    
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .filter-group label {
+        font-weight: 600;
+        color: var(--gray-700);
+    }
+    
+    .filter-group select,
+    .filter-group input {
+        padding: 0.625rem;
+        border: 2px solid var(--gray-300);
+        border-radius: var(--radius-md);
+        font-size: 0.9375rem;
+    }
+    
+    .filter-group select:focus,
+    .filter-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+    
+    .events-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .events-count {
+        color: var(--gray-600);
+        font-weight: 500;
+    }
+    
+    .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: var(--spacing-xl);
+    }
+    
+    .event-card {
+        background: var(--white);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        transition: all var(--transition-base);
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .event-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .event-image {
+        height: 200px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .event-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .event-image-icon {
+        font-size: 4rem;
+        opacity: 0.9;
+    }
+    
+    .event-badge {
+        position: absolute;
+        top: var(--spacing-md);
+        right: var(--spacing-md);
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--primary);
+        padding: 0.375rem 0.875rem;
+        border-radius: var(--radius-md);
+        font-size: 0.8125rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    
+    .event-content {
+        padding: var(--spacing-lg);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .event-title {
+        font-size: 1.375rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .event-description {
+        color: var(--gray-600);
+        margin-bottom: var(--spacing-lg);
+        line-height: 1.6;
+        flex: 1;
+    }
+    
+    .event-meta {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-lg);
+        padding-top: var(--spacing-md);
+        border-top: 1px solid var(--gray-200);
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        color: var(--gray-600);
+        font-size: 0.875rem;
+    }
+    
+    .event-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: var(--spacing-md);
+        border-top: 1px solid var(--gray-200);
+    }
+    
+    .event-club {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+        font-weight: 600;
+    }
+    
+    .event-status {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .status-full {
+        color: var(--danger);
+    }
+    
+    .status-available {
+        color: var(--success);
+    }
+    
+    .status-registered {
+        color: var(--primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <h1 class="dashboard-title" style="margin-bottom: var(--spacing-xl);">Browse Events 🔍</h1>
+        
+        <!-- Filters -->
+        <div class="filters-section">
+            <form method="GET" action="{{ url_for('students.browse_events') }}">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="club_id">Filter by Club</label>
+                        <select name="club_id" id="club_id">
+                            <option value="">All Clubs</option>
+                            {% for club in clubs %}
+                            <option value="{{ club.id }}" {% if selected_club == club.id %}selected{% endif %}>
+                                {{ club.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="event_type">Filter by Type</label>
+                        <select name="event_type" id="event_type">
+                            <option value="">All Types</option>
+                            <option value="Cultural" {% if selected_type == 'Cultural' %}selected{% endif %}>Cultural</option>
+                            <option value="Sports" {% if selected_type == 'Sports' %}selected{% endif %}>Sports</option>
+                            <option value="Technical" {% if selected_type == 'Technical' %}selected{% endif %}>Technical</option>
+                            <option value="Cybersecurity" {% if selected_type == 'Cybersecurity' %}selected{% endif %}>Cybersecurity</option>
+                            <option value="Robotics" {% if selected_type == 'Robotics' %}selected{% endif %}>Robotics</option>
+                            <option value="Workshop" {% if selected_type == 'Workshop' %}selected{% endif %}>Workshop</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="search">Search Events</label>
+                        <input type="text" name="search" id="search" placeholder="Search by title..." 
+                               value="{{ search_query or '' }}">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="{{ url_for('students.browse_events') }}" class="btn btn-outline">Clear Filters</a>
+            </form>
+        </div>
+        
+        <!-- Events Count -->
+        <div class="events-header">
+            <div class="events-count">{{ events|length }} events found</div>
+        </div>
+        
+        <!-- Events Grid -->
+        {% if events %}
+        <div class="events-grid">
+            {% for event in events %}
+            <div class="event-card">
+                <div class="event-image">
+                    {% if event.image_url %}
+                    <img src="{{ event.image_url }}" alt="{{ event.title }}">
+                    {% else %}
+                    <div class="event-image-icon">
+                        {% if event.event_type == 'Technical' %}💻
+                        {% elif event.event_type == 'Cultural' %}🎭
+                        {% elif event.event_type == 'Sports' %}⚽
+                        {% elif event.event_type == 'Workshop' %}🔧
+                        {% elif event.event_type == 'Cybersecurity' %}🔐
+                        {% elif event.event_type == 'Robotics' %}🤖
+                        {% else %}📌{% endif %}
+                    </div>
+                    {% endif %}
+                    <div class="event-badge">{{ event.event_type }}</div>
+                </div>
+                
+                <div class="event-content">
+                    <h3 class="event-title">{{ event.title }}</h3>
+                    <p class="event-description">{{ event.description[:120] }}{% if event.description|length > 120 %}...{% endif %}</p>
+                    
+                    <div class="event-meta">
+                        <div class="meta-item">
+                            <span>📅</span>
+                            <span>{{ event.event_date.strftime('%b %d, %Y') }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>⏰</span>
+                            <span>{{ event.event_date.strftime('%I:%M %p') }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>📍</span>
+                            <span>{{ event.venue }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>👥</span>
+                            <span>{{ event.current_participants }}/{{ event.max_participants }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="event-footer">
+                        <span class="event-club">🏛️ {{ event.club.name }}</span>
+                        
+                        {% if event.id in registered_event_ids %}
+                        <span class="event-status status-registered">✓ Registered</span>
+                        {% elif event.current_participants >= event.max_participants %}
+                        <span class="event-status status-full">🚫 Full</span>
+                        {% else %}
+                        {% if event.is_team_event %}
+                        <a href="{{ url_for('students.register_team', event_id=event.id) }}" class="btn btn-sm btn-primary">
+                            Register Team
+                        </a>
+                        {% else %}
+                        <form method="POST" action="{{ url_for('students.register_event', event_id=event.id) }}" style="margin: 0;">
+                            <button type="submit" class="btn btn-sm btn-primary">Register</button>
+                        </form>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <h3>No Events Found</h3>
+            <p>Try adjusting your filters or check back later for new events</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

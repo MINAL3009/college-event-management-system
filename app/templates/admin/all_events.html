@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}All Events - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        padding: var(--spacing-2xl) 0;
+        background: var(--light);
+        min-height: calc(100vh - 70px);
+    }
+    
+    .filters-section {
+        background: var(--white);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-xl);
+        display: flex;
+        gap: var(--spacing-md);
+        align-items: flex-end;
+    }
+    
+    .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: var(--spacing-xl);
+    }
+    
+    .event-card {
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-xl);
+        box-shadow: var(--shadow-md);
+        transition: all var(--transition-base);
+    }
+    
+    .event-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <h1 class="dashboard-title" style="margin-bottom: var(--spacing-xl);">All Events 📅</h1>
+        
+        <!-- Status Filter -->
+        <div class="filters-section">
+            <div class="filter-group" style="flex: 1;">
+                <label for="status">Filter by Status</label>
+                <select id="status" onchange="window.location.href='{{ url_for('admins.view_all_events') }}?status=' + this.value">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Events</option>
+                    <option value="upcoming" {% if status_filter == 'upcoming' %}selected{% endif %}>Upcoming</option>
+                    <option value="ongoing" {% if status_filter == 'ongoing' %}selected{% endif %}>Ongoing</option>
+                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Events Grid -->
+        {% if events %}
+        <div class="events-grid">
+            {% for event in events %}
+            <div class="event-card">
+                <div class="event-header">
+                    <div>
+                        <h3 class="event-title">{{ event.title }}</h3>
+                        <p style="color: var(--gray-600);">{{ event.club.name }}</p>
+                    </div>
+                    <div class="event-status-badge status-{{ event.status }}">
+                        {{ event.status|title }}
+                    </div>
+                </div>
+                
+                <div class="event-meta">
+                    <div class="meta-item">
+                        <span>📅</span>
+                        <span>{{ event.event_date.strftime('%b %d, %Y') }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>📍</span>
+                        <span>{{ event.venue }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>👥</span>
+                        <span>{{ event.current_participants }}/{{ event.max_participants }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>🏷️</span>
+                        <span>{{ event.event_type }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <h3>No Events Found</h3>
+            <p>No events match the selected filter</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

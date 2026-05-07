@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - CampusConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        padding: var(--spacing-2xl) 0;
+        background: var(--light);
+        min-height: calc(100vh - 70px);
+    }
+    
+    .profile-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .profile-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: var(--white);
+        padding: var(--spacing-2xl);
+        border-radius: var(--radius-xl);
+        text-align: center;
+        margin-bottom: var(--spacing-2xl);
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        margin: 0 auto var(--spacing-lg);
+        border: 4px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .profile-name {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .profile-email {
+        opacity: 0.9;
+        font-size: 1.125rem;
+    }
+    
+    .profile-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-2xl);
+    }
+    
+    .stat-box {
+        background: var(--white);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        text-align: center;
+    }
+    
+    .stat-box .value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--primary);
+        display: block;
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .stat-box .label {
+        color: var(--gray-600);
+        font-size: 0.9375rem;
+    }
+    
+    .profile-form {
+        background: var(--white);
+        padding: var(--spacing-2xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .form-section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-md);
+        border-bottom: 2px solid var(--gray-200);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <div class="profile-container">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="profile-avatar">👤</div>
+                <h1 class="profile-name">{{ current_user.name }}</h1>
+                <p class="profile-email">{{ current_user.email }}</p>
+            </div>
+            
+            <!-- Profile Statistics -->
+            <div class="profile-stats">
+                <div class="stat-box">
+                    <span class="value">{{ current_user.events_participated }}</span>
+                    <span class="label">Events Participated</span>
+                </div>
+                <div class="stat-box">
+                    <span class="value">{{ current_user.events_won }}</span>
+                    <span class="label">Events Won</span>
+                </div>
+                <div class="stat-box">
+                    <span class="value">{{ ((current_user.events_won / current_user.events_participated * 100)|round(1)) if current_user.events_participated > 0 else 0 }}%</span>
+                    <span class="label">Win Rate</span>
+                </div>
+            </div>
+            
+            <!-- Edit Profile Form -->
+            <div class="profile-form">
+                <h2 class="form-section-title">Personal Information</h2>
+                
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" value="{{ current_user.name }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" value="{{ current_user.email }}" disabled>
+                        <small style="color: var(--gray-500);">Email cannot be changed</small>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="branch">Branch</label>
+                            <select id="branch" name="branch" required>
+                                <option value="Computer Engineering" {% if current_user.branch == 'Computer Engineering' %}selected{% endif %}>Computer Engineering</option>
+                                <option value="Information Technology" {% if current_user.branch == 'Information Technology' %}selected{% endif %}>Information Technology</option>
+                                <option value="Electronics" {% if current_user.branch == 'Electronics' %}selected{% endif %}>Electronics</option>
+                                <option value="Mechanical" {% if current_user.branch == 'Mechanical' %}selected{% endif %}>Mechanical</option>
+                                <option value="Civil" {% if current_user.branch == 'Civil' %}selected{% endif %}>Civil</option>
+                                <option value="Electrical" {% if current_user.branch == 'Electrical' %}selected{% endif %}>Electrical</option>
+                                <option value="Other" {% if current_user.branch == 'Other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="year">Year</label>
+                            <select id="year" name="year" required>
+                                <option value="FY" {% if current_user.year == 'FY' %}selected{% endif %}>FY</option>
+                                <option value="SY" {% if current_user.year == 'SY' %}selected{% endif %}>SY</option>
+                                <option value="TY" {% if current_user.year == 'TY' %}selected{% endif %}>TY</option>
+                                <option value="Final Year" {% if current_user.year == 'Final Year' %}selected{% endif %}>Final Year</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="division">Division</label>
+                        <input type="text" id="division" name="division" value="{{ current_user.division }}" required>
+                    </div>
+                    
+                    <h2 class="form-section-title" style="margin-top: var(--spacing-2xl);">Change Password</h2>
+                    
+                    <div class="form-group">
+                        <label for="new_password">New Password</label>
+                        <input type="password" id="new_password" name="new_password" placeholder="Leave blank to keep current password">
+                        <small style="color: var(--gray-500);">Minimum 8 characters</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: var(--spacing-lg);">
+                        Update Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

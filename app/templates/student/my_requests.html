@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}My Requests - CampusConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        padding: var(--spacing-2xl) 0;
+        background: var(--light);
+        min-height: calc(100vh - 70px);
+    }
+    
+    .requests-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+    
+    .request-card {
+        background: var(--white);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .request-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .request-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .request-status {
+        padding: 0.375rem 1rem;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .status-pending {
+        background: #fef3c7;
+        color: var(--warning);
+    }
+    
+    .status-accepted {
+        background: #d1fae5;
+        color: var(--success);
+    }
+    
+    .status-rejected {
+        background: #fee2e2;
+        color: var(--danger);
+    }
+    
+    .request-meta {
+        display: flex;
+        gap: var(--spacing-xl);
+        margin-bottom: var(--spacing-md);
+        color: var(--gray-600);
+        font-size: 0.9375rem;
+    }
+    
+    .request-description {
+        color: var(--gray-700);
+        margin-bottom: var(--spacing-md);
+        line-height: 1.6;
+    }
+    
+    .club-feedback {
+        background: var(--gray-50);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        border-left: 4px solid var(--primary);
+        margin-top: var(--spacing-md);
+    }
+    
+    .club-feedback h4 {
+        font-weight: 600;
+        margin-bottom: var(--spacing-sm);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl);">
+            <h1 class="dashboard-title">My Event Requests 📨</h1>
+            <a href="{{ url_for('students.request_event') }}" class="btn btn-primary">
+                ➕ New Request
+            </a>
+        </div>
+        
+        {% if requests %}
+        <div class="requests-list">
+            {% for req in requests %}
+            <div class="request-card">
+                <div class="request-header">
+                    <div>
+                        <h3 class="request-title">{{ req.event_title }}</h3>
+                        <p style="color: var(--gray-600);">Requested from {{ req.club.name }}</p>
+                    </div>
+                    <div class="request-status status-{{ req.status }}">
+                        {{ req.status|title }}
+                    </div>
+                </div>
+                
+                <div class="request-meta">
+                    <span>🏷️ {{ req.event_type }}</span>
+                    <span>📅 {{ req.created_at.strftime('%b %d, %Y') }}</span>
+                    {% if req.responded_at %}
+                    <span>✓ Responded {{ req.responded_at.strftime('%b %d, %Y') }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="request-description">
+                    {{ req.description }}
+                </div>
+                
+                {% if req.club_feedback %}
+                <div class="club-feedback">
+                    <h4>Club Response:</h4>
+                    <p>{{ req.club_feedback }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📨</div>
+            <h3>No Event Requests</h3>
+            <p>You haven't requested any events yet</p>
+            <a href="{{ url_for('students.request_event') }}" class="btn btn-primary" style="margin-top: var(--spacing-lg);">
+                Request an Event
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

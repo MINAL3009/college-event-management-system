@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Create Event - CampusConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        padding: var(--spacing-2xl) 0;
+        background: var(--light);
+        min-height: calc(100vh - 70px);
+    }
+    
+    .form-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: var(--white);
+        padding: var(--spacing-2xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .form-header {
+        text-align: center;
+        margin-bottom: var(--spacing-2xl);
+    }
+    
+    .form-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .form-section {
+        margin-bottom: var(--spacing-2xl);
+    }
+    
+    .form-section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--secondary);
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-sm);
+        border-bottom: 2px solid var(--gray-200);
+    }
+    
+    .team-fields {
+        background: var(--gray-50);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-md);
+        margin-top: var(--spacing-md);
+    }
+    
+    .image-upload-area {
+        border: 2px dashed var(--gray-300);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-xl);
+        text-align: center;
+        transition: all var(--transition-base);
+        cursor: pointer;
+    }
+    
+    .image-upload-area:hover {
+        border-color: var(--primary);
+        background: var(--gray-50);
+    }
+    
+    .image-upload-icon {
+        font-size: 3rem;
+        margin-bottom: var(--spacing-md);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <div class="form-container">
+            <div class="form-header">
+                <h1>Create New Event 📅</h1>
+                <p style="color: var(--gray-600);">Fill in the details to create your event</p>
+            </div>
+            
+            <form method="POST" enctype="multipart/form-data">
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Basic Information</h2>
+                    
+                    <div class="form-group">
+                        <label for="title">Event Title *</label>
+                        <input type="text" id="title" name="title" placeholder="e.g., Annual Tech Fest 2024" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Description *</label>
+                        <textarea id="description" name="description" rows="4" 
+                                  placeholder="Describe your event in detail..." required></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="event_type">Event Type *</label>
+                            <select id="event_type" name="event_type" required>
+                                <option value="">Select type...</option>
+                                {% for type in event_types %}
+                                <option value="{{ type }}">{{ type }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="venue">Venue *</label>
+                            <input type="text" id="venue" name="venue" placeholder="e.g., Main Auditorium" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Date & Time -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Date & Time</h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="event_date">Event Date & Time *</label>
+                            <input type="datetime-local" id="event_date" name="event_date" required>
+                            <small style="color: var(--gray-500);">When will the event take place?</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="registration_deadline">Registration Deadline *</label>
+                            <input type="datetime-local" id="registration_deadline" name="registration_deadline" required>
+                            <small style="color: var(--gray-500);">Last date to register</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Participation Details -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Participation Details</h2>
+                    
+                    <div class="form-group">
+                        <label for="max_participants">Maximum Participants *</label>
+                        <input type="number" id="max_participants" name="max_participants" min="1" 
+                               placeholder="e.g., 100" required>
+                        <small style="color: var(--gray-500);">Maximum number of participants/teams allowed</small>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" id="is_team_event" name="is_team_event" onchange="toggleTeamFields()">
+                        <label for="is_team_event">This is a team event</label>
+                    </div>
+                    
+                    <div id="team-fields" class="team-fields" style="display: none;">
+                        <h3 style="margin-bottom: var(--spacing-md); font-size: 1.125rem;">Team Requirements</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="team_size_min">Minimum Team Size *</label>
+                                <input type="number" id="team_size_min" name="team_size_min" min="1" placeholder="e.g., 2">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="team_size_max">Maximum Team Size *</label>
+                                <input type="number" id="team_size_max" name="team_size_max" min="1" placeholder="e.g., 5">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional Information -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Additional Information</h2>
+                    
+                    <div class="form-group">
+                        <label for="rules">Rules & Guidelines (Optional)</label>
+                        <textarea id="rules" name="rules" rows="4" 
+                                  placeholder="List any rules or guidelines for participants..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Event Image (Optional)</label>
+                        <div class="image-upload-area" onclick="document.getElementById('image').click()">
+                            <div class="image-upload-icon">🖼️</div>
+                            <p style="color: var(--gray-600); margin-bottom: var(--spacing-xs);">
+                                <strong>Click to upload</strong> or drag and drop
+                            </p>
+                            <small style="color: var(--gray-500);">PNG, JPG, GIF up to 16MB</small>
+                            <input type="file" id="image" name="image" accept="image/*" style="display: none;" 
+                                   onchange="showFileName(this)">
+                        </div>
+                        <p id="file-name" style="margin-top: var(--spacing-sm); color: var(--primary); font-weight: 600;"></p>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: var(--spacing-lg);">
+                    Create Event
+                </button>
+                
+                <a href="{{ url_for('clubs.dashboard') }}" class="btn btn-outline" 
+                   style="width: 100%; margin-top: var(--spacing-md);">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleTeamFields() {
+    const checkbox = document.getElementById('is_team_event');
+    const fields = document.getElementById('team-fields');
+    const minInput = document.getElementById('team_size_min');
+    const maxInput = document.getElementById('team_size_max');
+    
+    if (checkbox.checked) {
+        fields.style.display = 'block';
+        minInput.required = true;
+        maxInput.required = true;
+    } else {
+        fields.style.display = 'none';
+        minInput.required = false;
+        maxInput.required = false;
+    }
+}
+
+function showFileName(input) {
+    const fileName = input.files[0]?.name;
+    const fileNameDisplay = document.getElementById('file-name');
+    if (fileName) {
+        fileNameDisplay.textContent = '✓ ' + fileName;
+    }
+}
+
+// Set minimum dates to today
+window.onload = function() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    const minDate = now.toISOString().slice(0, 16);
+    
+    document.getElementById('event_date').min = minDate;
+    document.getElementById('registration_deadline').min = minDate;
+};
+</script>
+{% endblock %}

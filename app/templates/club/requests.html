@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Event Requests - CampusConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        padding: var(--spacing-2xl) 0;
+        background: var(--light);
+        min-height: calc(100vh - 70px);
+    }
+    
+    .requests-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+    
+    .request-card {
+        background: var(--white);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .request-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .request-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .request-student {
+        color: var(--gray-600);
+        font-size: 0.9375rem;
+    }
+    
+    .request-status {
+        padding: 0.375rem 1rem;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .request-meta {
+        display: flex;
+        gap: var(--spacing-xl);
+        margin-bottom: var(--spacing-md);
+        color: var(--gray-600);
+    }
+    
+    .request-description {
+        background: var(--gray-50);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-lg);
+        line-height: 1.6;
+    }
+    
+    .request-actions {
+        display: flex;
+        gap: var(--spacing-md);
+    }
+    
+    .response-form {
+        background: var(--gray-50);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-md);
+        margin-top: var(--spacing-md);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <h1 class="dashboard-title" style="margin-bottom: var(--spacing-xl);">Event Requests 📨</h1>
+        
+        {% if requests %}
+        <div class="requests-list">
+            {% for req in requests %}
+            <div class="request-card">
+                <div class="request-header">
+                    <div>
+                        <h3 class="request-title">{{ req.event_title }}</h3>
+                        <p class="request-student">Requested by {{ req.student.name }}</p>
+                    </div>
+                    <div class="request-status status-{{ req.status }}">
+                        {{ req.status|title }}
+                    </div>
+                </div>
+                
+                <div class="request-meta">
+                    <span>🏷️ {{ req.event_type }}</span>
+                    <span>📅 {{ req.created_at.strftime('%b %d, %Y') }}</span>
+                    <span>✉️ {{ req.student.email }}</span>
+                </div>
+                
+                <div class="request-description">
+                    <strong>Description:</strong><br>
+                    {{ req.description }}
+                </div>
+                
+                {% if req.status == 'pending' %}
+                <button onclick="toggleResponseForm('{{ req.id }}')" class="btn btn-sm btn-primary">
+                    Respond to Request
+                </button>
+                
+                <div id="response-form-{{ req.id }}" class="response-form" style="display: none;">
+                    <form method="POST" action="{{ url_for('clubs.respond_request', request_id=req.id) }}">
+                        <div class="form-group">
+                            <label>Your Response</label>
+                            <select name="status" required style="width: 100%; padding: 0.625rem; border: 2px solid var(--gray-300); border-radius: var(--radius-md); margin-bottom: var(--spacing-md);">
+                                <option value="">Select response...</option>
+                                <option value="accepted">✓ Accept Request</option>
+                                <option value="rejected">✕ Reject Request</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Feedback for Student</label>
+                            <textarea name="feedback" rows="3" placeholder="Provide feedback..." required
+                                      style="width: 100%; padding: 0.625rem; border: 2px solid var(--gray-300); border-radius: var(--radius-md);"></textarea>
+                        </div>
+                        
+                        <div style="display: flex; gap: var(--spacing-md);">
+                            <button type="submit" class="btn btn-sm btn-primary">Send Response</button>
+                            <button type="button" onclick="toggleResponseForm('{{ req.id }}')" class="btn btn-sm btn-outline">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                {% else %}
+                <div style="background: var(--gray-50); padding: var(--spacing-md); border-radius: var(--radius-md); margin-top: var(--spacing-md);">
+                    <strong>Your Feedback:</strong><br>
+                    {{ req.club_feedback }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📨</div>
+            <h3>No Event Requests</h3>
+            <p>You haven't received any event requests from students yet</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function toggleResponseForm(requestId) {
+    const form = document.getElementById('response-form-' + requestId);
+    if (form.style.display === 'none') {
+        form.style.display = 'block';
+    } else {
+        form.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

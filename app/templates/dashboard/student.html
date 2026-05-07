@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - CampusConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        min-height: calc(100vh - 70px);
+        background: var(--light);
+    }
+    
+    .sidebar {
+        background: var(--white);
+        box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+        padding: var(--spacing-xl) 0;
+    }
+    
+    .sidebar-header {
+        padding: 0 var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .sidebar-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    
+    .sidebar-menu {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .menu-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md) var(--spacing-lg);
+        color: var(--gray-700);
+        font-weight: 500;
+        transition: all var(--transition-base);
+        border-left: 3px solid transparent;
+        position: relative;
+    }
+    
+    .menu-item:hover {
+        background: var(--gray-100);
+        color: var(--primary);
+    }
+    
+    .menu-item.active {
+        background: var(--gray-100);
+        color: var(--primary);
+        border-left-color: var(--primary);
+    }
+    
+    .menu-icon {
+        font-size: 1.25rem;
+    }
+    
+    .notification-badge {
+        position: absolute;
+        right: var(--spacing-lg);
+        background: var(--danger);
+        color: var(--white);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+    
+    .main-content {
+        padding: var(--spacing-2xl);
+        overflow-y: auto;
+    }
+    
+    .dashboard-header {
+        margin-bottom: var(--spacing-2xl);
+    }
+    
+    .dashboard-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .dashboard-subtitle {
+        color: var(--gray-600);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-2xl);
+    }
+    
+    .stat-card {
+        background: var(--white);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        transition: transform var(--transition-base);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .stat-icon {
+        font-size: 2rem;
+    }
+    
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--primary);
+    }
+    
+    .stat-label {
+        color: var(--gray-600);
+        font-weight: 500;
+    }
+    
+    .section {
+        background: var(--white);
+        padding: var(--spacing-xl);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .event-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+    
+    .event-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-lg);
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        border-left: 4px solid var(--primary);
+    }
+    
+    .event-info h4 {
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .event-meta {
+        display: flex;
+        gap: var(--spacing-lg);
+        color: var(--gray-600);
+        font-size: 0.875rem;
+    }
+    
+    .event-meta span {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .sidebar {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">Student Panel</div>
+        </div>
+        
+        <nav class="sidebar-menu">
+            <a href="{{ url_for('students.dashboard') }}" class="menu-item active">
+                <span class="menu-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('students.browse_events') }}" class="menu-item">
+                <span class="menu-icon">🔍</span>
+                <span>Browse Events</span>
+            </a>
+            <a href="{{ url_for('students.my_registrations') }}" class="menu-item">
+                <span class="menu-icon">📋</span>
+                <span>My Registrations</span>
+            </a>
+            <a href="{{ url_for('students.request_event') }}" class="menu-item">
+                <span class="menu-icon">✉️</span>
+                <span>Request Event</span>
+            </a>
+            <a href="{{ url_for('students.my_requests') }}" class="menu-item">
+                <span class="menu-icon">📨</span>
+                <span>My Requests</span>
+            </a>
+            <a href="{{ url_for('students.notifications') }}" class="menu-item">
+                <span class="menu-icon">🔔</span>
+                <span>Notifications</span>
+                {% if unread_notifications > 0 %}
+                <span class="notification-badge">{{ unread_notifications }}</span>
+                {% endif %}
+            </a>
+            <a href="{{ url_for('students.profile') }}" class="menu-item">
+                <span class="menu-icon">👤</span>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Welcome back, {{ current_user.name }}! 👋</h1>
+            <p class="dashboard-subtitle">Here's what's happening with your events</p>
+        </div>
+        
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-value">{{ total_registrations }}</div>
+                        <div class="stat-label">Total Registrations</div>
+                    </div>
+                    <div class="stat-icon">📝</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-value">{{ upcoming_events_count }}</div>
+                        <div class="stat-label">Upcoming Events</div>
+                    </div>
+                    <div class="stat-icon">📅</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-value">{{ events_won }}</div>
+                        <div class="stat-label">Events Won</div>
+                    </div>
+                    <div class="stat-icon">🏆</div>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-value">{{ events_participated }}</div>
+                        <div class="stat-label">Total Participated</div>
+                    </div>
+                    <div class="stat-icon">✅</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Upcoming Events -->
+        <section class="section">
+            <h2 class="section-title">Your Upcoming Events</h2>
+            
+            {% if upcoming_events %}
+            <div class="event-list">
+                {% for event in upcoming_events %}
+                <div class="event-item">
+                    <div class="event-info">
+                        <h4>{{ event.title }}</h4>
+                        <div class="event-meta">
+                            <span>📅 {{ event.event_date.strftime('%b %d, %Y') }}</span>
+                            <span>⏰ {{ event.event_date.strftime('%I:%M %p') }}</span>
+                            <span>📍 {{ event.venue }}</span>
+                            <span>🏛️ {{ event.club.name }}</span>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('events.view', event_id=event.id) }}" class="btn btn-sm btn-primary">
+                        View Details
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📅</div>
+                <h3>No Upcoming Events</h3>
+                <p>You haven't registered for any upcoming events yet</p>
+                <a href="{{ url_for('students.browse_events') }}" class="btn btn-primary" style="margin-top: var(--spacing-lg);">
+                    Browse Events
+                </a>
+            </div>
+            {% endif %}
+        </section>
+        
+        <!-- Quick Actions -->
+        <section class="section">
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="stats-grid">
+                <a href="{{ url_for('students.browse_events') }}" class="feature-card" style="text-decoration: none;">
+                    <div class="feature-icon">🔍</div>
+                    <h3 class="feature-title">Browse Events</h3>
+                    <p class="feature-text">Discover new events and register</p>
+                </a>
+                
+                <a href="{{ url_for('students.request_event') }}" class="feature-card" style="text-decoration: none;">
+                    <div class="feature-icon">✉️</div>
+                    <h3 class="feature-title">Request Event</h3>
+                    <p class="feature-text">Suggest an event to clubs</p>
+                </a>
+                
+                <a href="{{ url_for('students.my_registrations') }}" class="feature-card" style="text-decoration: none;">
+                    <div class="feature-icon">📜</div>
+                    <h3 class="feature-title">My Registrations</h3>
+                    <p class="feature-text">View events & download certificates</p>
+                </a>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}

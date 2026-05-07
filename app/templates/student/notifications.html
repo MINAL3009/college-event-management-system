@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - CampusConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        padding: var(--spacing-2xl) 0;
+        background: var(--light);
+        min-height: calc(100vh - 70px);
+    }
+    
+    .notifications-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .notifications-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+    
+    .notification-item {
+        background: var(--white);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        border-left: 4px solid var(--gray-300);
+        transition: all var(--transition-base);
+        position: relative;
+    }
+    
+    .notification-item.unread {
+        background: #eff6ff;
+        border-left-color: var(--primary);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .notification-item:hover {
+        transform: translateX(4px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .notification-icon {
+        font-size: 1.5rem;
+        margin-right: var(--spacing-md);
+    }
+    
+    .notification-content {
+        flex: 1;
+    }
+    
+    .notification-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .notification-message {
+        color: var(--gray-700);
+        line-height: 1.6;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .notification-time {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+    }
+    
+    .notification-badge {
+        position: absolute;
+        top: var(--spacing-md);
+        right: var(--spacing-md);
+        width: 10px;
+        height: 10px;
+        background: var(--primary);
+        border-radius: 50%;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-2xl);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <div class="notifications-header">
+            <h1 class="dashboard-title">Notifications 🔔</h1>
+            <div>
+                <a href="{{ url_for('students.dashboard') }}" class="btn btn-outline">
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+        
+        {% if notifications.items %}
+        <div class="notifications-list">
+            {% for notification in notifications.items %}
+            <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
+                {% if not notification.is_read %}
+                <div class="notification-badge"></div>
+                {% endif %}
+                
+                <div style="display: flex;">
+                    <div class="notification-icon">
+                        {% if notification.notification_type == 'event_registration' %}📝
+                        {% elif notification.notification_type == 'result' %}🏆
+                        {% elif notification.notification_type == 'new_event' %}📅
+                        {% elif notification.notification_type == 'announcement' %}📢
+                        {% elif notification.notification_type == 'request_response' %}✉️
+                        {% else %}🔔{% endif %}
+                    </div>
+                    
+                    <div class="notification-content">
+                        <div class="notification-header">
+                            <div class="notification-title">{{ notification.title }}</div>
+                        </div>
+                        
+                        <div class="notification-message">
+                            {{ notification.message }}
+                        </div>
+                        
+                        <div class="notification-time">
+                            {{ notification.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                        </div>
+                        
+                        {% if not notification.is_read %}
+                        <form method="POST" action="{{ url_for('students.mark_notification_read', notif_id=notification.id) }}" style="margin-top: var(--spacing-sm);">
+                            <button type="submit" class="btn btn-sm btn-outline">
+                                Mark as Read
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if notifications.pages > 1 %}
+        <div class="pagination">
+            {% if notifications.has_prev %}
+            <a href="{{ url_for('students.notifications', page=notifications.prev_num) }}" class="btn btn-outline">
+                ← Previous
+            </a>
+            {% endif %}
+            
+            <span>Page {{ notifications.page }} of {{ notifications.pages }}</span>
+            
+            {% if notifications.has_next %}
+            <a href="{{ url_for('students.notifications', page=notifications.next_num) }}" class="btn btn-outline">
+                Next →
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🔔</div>
+            <h3>No Notifications</h3>
+            <p>You're all caught up! No new notifications.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

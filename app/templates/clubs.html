@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Our Clubs - CampusConnect{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Our Clubs</h1>
+        <p>Student-run organizations bringing exciting events to campus</p>
+    </div>
+</section>
+
+<section class="clubs-section">
+    <div class="container">
+        {% if clubs %}
+        <div class="clubs-grid">
+            {% for club in clubs %}
+            <div class="club-card">
+                <div class="club-icon">
+                    {{ club.name[0].upper() }}
+                </div>
+                <h3 class="club-name">{{ club.name }}</h3>
+                <p class="club-description">{{ club.description or 'Fostering innovation and excellence' }}</p>
+                
+                <div class="club-stats">
+                    <div class="club-stat">
+                        <span class="stat-number">{{ club.events.count() }}</span>
+                        <span class="stat-label">Events</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🏛️</div>
+            <h3>No Clubs Yet</h3>
+            <p>Clubs will appear here soon!</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

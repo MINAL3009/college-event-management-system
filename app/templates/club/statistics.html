@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Club Statistics - CampusConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        padding: var(--spacing-2xl) 0;
+        background: var(--light);
+        min-height: calc(100vh - 70px);
+    }
+    
+    .stats-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--spacing-xl);
+        margin-bottom: var(--spacing-2xl);
+    }
+    
+    .stat-card {
+        background: var(--white);
+        padding: var(--spacing-2xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--secondary);
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .stat-label {
+        font-size: 1.125rem;
+        color: var(--gray-600);
+    }
+    
+    .chart-section {
+        background: var(--white);
+        padding: var(--spacing-2xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .chart-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .bar-chart {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+    
+    .bar-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-lg);
+    }
+    
+    .bar-label {
+        min-width: 150px;
+        font-weight: 600;
+        color: var(--gray-700);
+    }
+    
+    .bar-container {
+        flex: 1;
+        height: 40px;
+        background: var(--gray-200);
+        border-radius: var(--radius-md);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .bar-fill {
+        height: 100%;
+        background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: var(--spacing-md);
+        color: var(--white);
+        font-weight: 700;
+        transition: width 1s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <h1 class="dashboard-title" style="margin-bottom: var(--spacing-xl);">Club Statistics 📈</h1>
+        
+        <!-- Overview Stats -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-value">{{ total_events }}</div>
+                <div class="stat-label">Total Events</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value">{{ total_participants }}</div>
+                <div class="stat-label">Total Participants</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value">{{ avg_participants }}</div>
+                <div class="stat-label">Avg Participants/Event</div>
+            </div>
+        </div>
+        
+        <!-- Events by Type -->
+        <div class="chart-section">
+            <h2 class="chart-title">Events by Type</h2>
+            {% if events_by_type %}
+            <div class="bar-chart">
+                {% set max_count = events_by_type.values()|max %}
+                {% for type, count in events_by_type.items() %}
+                <div class="bar-item">
+                    <div class="bar-label">{{ type }}</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: {{ (count / max_count * 100)|round }}%;">
+                            {{ count }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: var(--gray-600); text-align: center;">No data available</p>
+            {% endif %}
+        </div>
+        
+        <!-- Events by Status -->
+        <div class="chart-section">
+            <h2 class="chart-title">Events by Status</h2>
+            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-lg);">
+                <div style="background: #dbeafe; padding: var(--spacing-xl); border-radius: var(--radius-lg); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary);">
+                        {{ events_by_status.upcoming }}
+                    </div>
+                    <div style="color: var(--gray-700); font-weight: 600;">Upcoming</div>
+                </div>
+                
+                <div style="background: #fef3c7; padding: var(--spacing-xl); border-radius: var(--radius-lg); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--warning);">
+                        {{ events_by_status.ongoing }}
+                    </div>
+                    <div style="color: var(--gray-700); font-weight: 600;">Ongoing</div>
+                </div>
+                
+                <div style="background: #d1fae5; padding: var(--spacing-xl); border-radius: var(--radius-lg); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--success);">
+                        {{ events_by_status.completed }}
+                    </div>
+                    <div style="color: var(--gray-700); font-weight: 600;">Completed</div>
+                </div>
+                
+                <div style="background: #fee2e2; padding: var(--spacing-xl); border-radius: var(--radius-lg); text-align: center;">
+                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--danger);">
+                        {{ events_by_status.cancelled }}
+                    </div>
+                    <div style="color: var(--gray-700); font-weight: 600;">Cancelled</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

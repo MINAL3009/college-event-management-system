@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Students - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        padding: var(--spacing-2xl) 0;
+        background: var(--light);
+        min-height: calc(100vh - 70px);
+    }
+    
+    .filters-section {
+        background: var(--white);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: var(--spacing-lg);
+    }
+    
+    .table-container {
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        overflow-x: auto;
+    }
+    
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .table thead {
+        background: var(--danger);
+        color: var(--white);
+    }
+    
+    .table th {
+        padding: var(--spacing-lg);
+        text-align: left;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    
+    .table td {
+        padding: var(--spacing-lg);
+        border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .table tbody tr:hover {
+        background: var(--gray-50);
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-md);
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .status-active {
+        background: #d1fae5;
+        color: var(--success);
+    }
+    
+    .status-inactive {
+        background: #fee2e2;
+        color: var(--danger);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <h1 class="dashboard-title" style="margin-bottom: var(--spacing-xl);">Manage Students 👥</h1>
+        
+        <!-- Filters -->
+        <div class="filters-section">
+            <form method="GET" action="{{ url_for('admins.manage_students') }}">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="status">Status</label>
+                        <select name="status" id="status">
+                            <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Students</option>
+                            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+                            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive Only</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="branch">Branch</label>
+                        <select name="branch" id="branch">
+                            <option value="">All Branches</option>
+                            {% for branch in branches %}
+                            <option value="{{ branch }}" {% if branch_filter == branch %}selected{% endif %}>{{ branch }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="year">Year</label>
+                        <select name="year" id="year">
+                            <option value="">All Years</option>
+                            {% for year in years %}
+                            <option value="{{ year }}" {% if year_filter == year %}selected{% endif %}>{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="search">Search</label>
+                        <input type="text" name="search" id="search" placeholder="Search..." value="{{ search_query or '' }}">
+                    </div>
+                </div>
+                
+                <div style="margin-top: var(--spacing-md);">
+                    <button type="submit" class="btn btn-sm btn-primary">Apply Filters</button>
+                    <a href="{{ url_for('admins.manage_students') }}" class="btn btn-sm btn-outline">Clear</a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Students Table -->
+        {% if students %}
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Branch</th>
+                        <th>Year</th>
+                        <th>Division</th>
+                        <th>Participated</th>
+                        <th>Won</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td><strong>{{ student.name }}</strong></td>
+                        <td>{{ student.email }}</td>
+                        <td>{{ student.branch }}</td>
+                        <td>{{ student.year }}</td>
+                        <td>{{ student.division }}</td>
+                        <td>{{ student.events_participated }}</td>
+                        <td>{{ student.events_won }}</td>
+                        <td>
+                            <span class="status-badge status-{{ 'active' if student.is_active else 'inactive' }}">
+                                {{ 'Active' if student.is_active else 'Inactive' }}
+                            </span>
+                        </td>
+                        <td>{{ student.created_at.strftime('%b %d, %Y') }}</td>
+                        <td>
+                            {% if student.is_active %}
+                            <form method="POST" action="{{ url_for('admins.toggle_student_status', student_id=student.id) }}" 
+                                  onsubmit="return confirm('Are you sure you want to deactivate this student?');" style="display: inline;">
+                                <button type="submit" class="action-btn btn-deactivate">
+                                    Deactivate
+                                </button>
+                            </form>
+                            {% else %}
+                            <span style="color: var(--gray-500); font-weight: 600;">Deactivated</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">👥</div>
+            <h3>No Students Found</h3>
+            <p>No students match your filters</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

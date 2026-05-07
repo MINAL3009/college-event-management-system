@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Create Club - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        padding: var(--spacing-2xl) 0;
+        background: var(--light);
+        min-height: calc(100vh - 70px);
+    }
+    
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+        background: var(--white);
+        padding: var(--spacing-2xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .form-header {
+        text-align: center;
+        margin-bottom: var(--spacing-2xl);
+    }
+    
+    .info-box {
+        background: #fef3c7;
+        border-left: 4px solid var(--warning);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-2xl);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <div class="form-container">
+            <div class="form-header">
+                <h1 style="font-size: 2rem; font-weight: 800; color: var(--gray-900); margin-bottom: var(--spacing-sm);">
+                    Create New Club 🏛️
+                </h1>
+                <p style="color: var(--gray-600);">Add a new club to the system</p>
+            </div>
+            
+            <div class="info-box">
+                <strong>⚠️ Important:</strong> A secure password will be auto-generated. Make sure to save the credentials as they cannot be retrieved later!
+            </div>
+            
+            <form method="POST">
+                <div class="form-group">
+                    <label for="name">Club Name *</label>
+                    <input type="text" id="name" name="name" placeholder="e.g., Tech Innovators Club" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="username">Username *</label>
+                    <input type="text" id="username" name="username" placeholder="e.g., tech_innovators" required>
+                    <small style="color: var(--gray-500);">This will be used for login</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" placeholder="club@college.edu" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description (Optional)</label>
+                    <textarea id="description" name="description" rows="4" 
+                              placeholder="Brief description about the club..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: var(--spacing-lg);">
+                    Create Club
+                </button>
+                
+                <a href="{{ url_for('admins.dashboard') }}" class="btn btn-outline" style="width: 100%; margin-top: var(--spacing-md);">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

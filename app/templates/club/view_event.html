@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.title }} - CampusConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-container {
+        padding: var(--spacing-2xl) 0;
+        background: var(--light);
+        min-height: calc(100vh - 70px);
+    }
+    
+    .event-details {
+        background: var(--white);
+        padding: var(--spacing-2xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .event-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 2px solid var(--gray-200);
+    }
+    
+    .event-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+    }
+    
+    .info-icon {
+        font-size: 1.5rem;
+    }
+    
+    .registrations-section {
+        background: var(--white);
+        padding: var(--spacing-2xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--spacing-lg);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <a href="{{ url_for('clubs.my_events') }}" class="btn btn-outline" style="margin-bottom: var(--spacing-lg);">
+            ← Back to My Events
+        </a>
+        
+        <!-- Event Details -->
+        <div class="event-details">
+            <div class="event-header">
+                <div>
+                    <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: var(--spacing-sm);">
+                        {{ event.title }}
+                    </h1>
+                    <p style="color: var(--gray-600); font-size: 1.125rem;">{{ event.event_type }} Event</p>
+                </div>
+                <div class="event-status-badge status-{{ event.status }}">
+                    {{ event.status|title }}
+                </div>
+            </div>
+            
+            <div class="event-info-grid">
+                <div class="info-item">
+                    <div class="info-icon">📅</div>
+                    <div>
+                        <strong>Date</strong><br>
+                        {{ event.event_date.strftime('%B %d, %Y') }}
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-icon">⏰</div>
+                    <div>
+                        <strong>Time</strong><br>
+                        {{ event.event_date.strftime('%I:%M %p') }}
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-icon">📍</div>
+                    <div>
+                        <strong>Venue</strong><br>
+                        {{ event.venue }}
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-icon">👥</div>
+                    <div>
+                        <strong>Participants</strong><br>
+                        {{ event.current_participants }}/{{ event.max_participants }}
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: var(--spacing-lg);">
+                <h3 style="font-weight: 700; margin-bottom: var(--spacing-sm);">Description</h3>
+                <p style="color: var(--gray-700); line-height: 1.6;">{{ event.description }}</p>
+            </div>
+            
+            {% if event.rules %}
+            <div>
+                <h3 style="font-weight: 700; margin-bottom: var(--spacing-sm);">Rules & Guidelines</h3>
+                <p style="color: var(--gray-700); line-height: 1.6; white-space: pre-line;">{{ event.rules }}</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Registrations -->
+        <div class="registrations-section">
+            <h2 class="section-title">
+                {% if is_team %}Team Registrations{% else %}Registrations{% endif %}
+            </h2>
+            
+            {% if is_team %}
+                {% if teams %}
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Team Name</th>
+                                <th>Leader</th>
+                                <th>Members</th>
+                                <th>Registered On</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for team in teams %}
+                            <tr>
+                                <td><strong>{{ team.team_name }}</strong></td>
+                                <td>{{ team.leader.name }}</td>
+                                <td>{{ team.members.count() }}</td>
+                                <td>{{ team.created_at.strftime('%b %d, %Y') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">👥</div>
+                    <h3>No Team Registrations Yet</h3>
+                </div>
+                {% endif %}
+            {% else %}
+                {% if registrations %}
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Email</th>
+                                <th>Branch</th>
+                                <th>Year</th>
+                                <th>Registered On</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reg, student in registrations %}
+                            <tr>
+                                <td><strong>{{ student.name }}</strong></td>
+                                <td>{{ student.email }}</td>
+                                <td>{{ student.branch }}</td>
+                                <td>{{ student.year }}</td>
+                                <td>{{ reg.registration_date.strftime('%b %d, %Y') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">👥</div>
+                    <h3>No Registrations Yet</h3>
+                </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
